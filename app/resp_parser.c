@@ -99,7 +99,8 @@ char* build_response(struct array_element* command, int len)
     }
 
     if (strcmp(first.data, "echo") == 0) {
-        sprintf(buffer, "$%d\r\n%s\r\n", first.len, first.data);
+        struct bulk_string arg = *(struct bulk_string*)command[1].data;
+        sprintf(buffer, "$%d\r\n%s\r\n", arg.len, arg.data);
     }
 
     else if (strcmp(first.data, "ping")) {
