@@ -149,18 +149,41 @@ int init_server_socket()
 
 void handle_client_connection(int client_fd)
 {
-	const char* msg = "+PONG\r\n";
-	char buffer[1024];
+    const char* msg = "+PONG\r\n";
+    char buffer[BUFFER_SIZE];
+    int valread;
 
-	if (client_fd >= 0) {
-		printf("Client connected\n");
-
-		while (read(client_fd, buffer, BUFFER_SIZE)) {
-			send(client_fd, msg, strlen(msg), 0);
-		}
-		
-	}
-	else {
-		printf("Client connection failed: %s...\n", strerror(errno));
-	}
+    if (client_fd >= 0) {
+        valread = read(client_fd, buffer, BUFFER_SIZE);
+        
+        if (valread == 0) {
+            // Connection was closed by the client
+            printf("Client %d disconnected\n", client_fd);
+            close(client_fd);
+        } else if (valread > 0) {
+            // Respond with PONG
+            send(client_fd, msg, strlen(msg), 0);
+        } else {
+            printf("Read error on client %d: %s\n", client_fd, strerror(errno));
+        }
+    }
 }
+
+
+//void handle_client_connection(int client_fd)
+//{
+//	const char* msg = "+PONG\r\n";
+//	char buffer[1024];
+//
+//	if (client_fd >= 0) {
+//		printf("Client connected\n");
+//
+//		while (read(client_fd, buffer, BUFFER_SIZE)) {
+//			send(client_fd, msg, strlen(msg), 0);
+//		}
+//		
+//	}
+//	else {
+//		printf("Client connection failed: %s...\n", strerror(errno));
+//	}
+//}
