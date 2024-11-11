@@ -5,6 +5,25 @@
 
 #include "resp_parser.h"
 
+
+int get_array_len(char* data)
+{
+    int len = 0;
+    if (data[0] != '*') {
+        printf("The data is not a a valid RESP array!\n");
+        return NULL;
+    }
+
+    data++;
+    while(*data != '\r') {
+        len = (len*10)+(*data - '0');
+        data++;
+    }
+
+    return len;
+}
+
+
 int get_len_element(char type, char** data)
 {
     int len = 0;
@@ -82,7 +101,7 @@ char* build_response(struct array_element* command, int len)
     if (strcmp(first.data, "echo") == 0) {
         sprintf(buffer, "$%d\r\n%s\r\n", first.len, first.data);
     }
-    
+
     else if (strcmp(first.data, "ping")) {
         sprintf(buffer, "+PONG\r\n");
     }
