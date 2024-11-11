@@ -95,6 +95,7 @@ int main()
 		// else its some IO operation in some client socket
 		for (i = 0; i < 30; i++) {
 			if (FD_ISSET(client_fds[i], &readfds)) {
+				printf("Client %d sent ping message\n", client_fds[i]);
 				handle_client_connection(client_fds[i]);
 			}
 		}
