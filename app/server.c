@@ -15,7 +15,7 @@
 #define BUFFER_SIZE 1024
 
 int init_server_socket();
-void handle_client_connection(int);
+int handle_client_connection(int);
 
 int main()
 {
@@ -96,7 +96,12 @@ int main()
 		for (i = 0; i < 30; i++) {
 			if (FD_ISSET(client_fds[i], &readfds)) {
 				printf("Client %d sent ping message\n", client_fds[i]);
-				handle_client_connection(client_fds[i]);
+				// returns 1 if the connection was closed, 0 for success,
+				// -1 for error
+				int ret = handle_client_connection(client_fds[i]);
+				if (ret == 1) {
+					client_fds[i] = 0;
+				}
 			}
 		}
 
@@ -147,11 +152,13 @@ int init_server_socket()
 	return server_fd;
 }
 
-void handle_client_connection(int client_fd)
+int handle_client_connection(int client_fd)
 {
     const char* msg = "+PONG\r\n";
     char buffer[BUFFER_SIZE];
     int valread;
+	int return_value;
+
 
     if (client_fd >= 0) {
         valread = read(client_fd, buffer, BUFFER_SIZE);
@@ -160,13 +167,18 @@ void handle_client_connection(int client_fd)
             // Connection was closed by the client
             printf("Client %d disconnected\n", client_fd);
             close(client_fd);
+			return_value = 1;
         } else if (valread > 0) {
             // Respond with PONG
             send(client_fd, msg, strlen(msg), 0);
+			return_value = 0;
         } else {
             printf("Read error on client %d: %s\n", client_fd, strerror(errno));
+			return_value = -1;
         }
     }
+
+	return return_value;
 }
 
 
