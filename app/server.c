@@ -10,6 +10,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "resp_parser.h"
+
 #define PORT 6379
 #define BACKLOG 5
 #define BUFFER_SIZE 1024
@@ -159,7 +161,6 @@ int handle_client_connection(int client_fd)
     int valread;
 	int return_value;
 
-
     if (client_fd >= 0) {
         valread = read(client_fd, buffer, BUFFER_SIZE);
         
@@ -169,9 +170,13 @@ int handle_client_connection(int client_fd)
             close(client_fd);
 			return_value = 1;
         } else if (valread > 0) {
-            // Respond with PONG
-            send(client_fd, msg, strlen(msg), 0);
-			return_value = 0;
+            // parse message
+			int array_len = get_array_len(buffer);
+			struct array_element* received = parse_array(buffer);
+			char* response = build_response(received, array_len);
+
+			send(client_fd, response, strlen(response), 0);
+
         } else {
             printf("Read error on client %d: %s\n", client_fd, strerror(errno));
 			return_value = -1;
@@ -180,22 +185,3 @@ int handle_client_connection(int client_fd)
 
 	return return_value;
 }
-
-
-//void handle_client_connection(int client_fd)
-//{
-//	const char* msg = "+PONG\r\n";
-//	char buffer[1024];
-//
-//	if (client_fd >= 0) {
-//		printf("Client connected\n");
-//
-//		while (read(client_fd, buffer, BUFFER_SIZE)) {
-//			send(client_fd, msg, strlen(msg), 0);
-//		}
-//		
-//	}
-//	else {
-//		printf("Client connection failed: %s...\n", strerror(errno));
-//	}
-//}
