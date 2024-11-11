@@ -24,6 +24,11 @@ int main()
 
 
 	int server_fd, client_addr_len;
+	
+	server_fd = init_server_socket();
+	if (server_fd == -1)
+		return 1;
+
 	struct sockaddr_in client_addr;
 
 
