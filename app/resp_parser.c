@@ -75,12 +75,14 @@ struct array_element* parse_array(char* data)
         (struct array_element*)malloc(sizeof(struct array_element) * len);
     
     for (int i = 0; i < len; i++) {
-        if (data[0] == '$') {
+        switch (data[0]) {
+        case BULK_STRING:
             elements[i].type = BULK_STRING;
             struct bulk_string* str = (struct bulk_string*)malloc(sizeof(struct bulk_string));
             *str = parse_bulk_string(&data);
             elements[i].data = str;
-            
+            break;
+
         }
 
     }
