@@ -103,7 +103,7 @@ char* build_response(struct array_element* command, int len)
         sprintf(buffer, "$%d\r\n%s\r\n", arg.len, arg.data);
     }
 
-    else if (strcmp(first.data, "ping")) {
+    else if (strcmp(first.data, "ping") == 0) {
         sprintf(buffer, "+PONG\r\n");
     }
 
