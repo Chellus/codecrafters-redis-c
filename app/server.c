@@ -79,6 +79,7 @@ int main()
 
 		// if something happened on the master socket, its an incoming connection
 		if (FD_ISSET(server_fd, &readfds)) {
+			printf("Client trying to connect\n");
 			int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
 			
 			handle_client_connection(client_fd);
