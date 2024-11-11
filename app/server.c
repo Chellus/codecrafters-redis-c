@@ -9,6 +9,7 @@
 
 #define PORT 6379
 #define BACKLOG 5
+#define BUFFER_SIZE 1024
 
 int init_server_socket();
 void handle_client_connection(int);
@@ -87,10 +88,15 @@ int init_server_socket()
 void handle_client_connection(int client_fd)
 {
 	const char* msg = "+PONG\r\n";
+	char buffer[1024];
 
 	if (client_fd >= 0) {
 		printf("Client connected\n");
-		send(client_fd, msg, strlen(msg), 0);
+
+		while (read(client_fd, buffer, BUFFER_SIZE)) {
+			send(client_fd, msg, strlen(msg), 0);
+		}
+		
 	}
 	else {
 		printf("Client connection failed: %s...\n", strerror(errno));
