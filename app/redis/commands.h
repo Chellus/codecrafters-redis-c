@@ -2,7 +2,7 @@
 #define _COMMANDS_H
 
 #include "resp_parser.h"
-#include "utils/hash_table/hash_table.h"
+#include "hash_table/hash_table.h"
 
 #define PING 1
 #define ECHO 2

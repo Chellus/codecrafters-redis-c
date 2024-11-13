@@ -12,7 +12,7 @@
 
 #include "redis/commands.h"
 #include "redis/resp_parser.h"
-#include "utils/hash_table/hash_table.h"
+#include "hash_table/hash_table.h"
 
 #define PORT 6379
 #define BACKLOG 5
