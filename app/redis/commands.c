@@ -56,7 +56,6 @@ char* redis_get(hash_table* memory, struct array_element* elements, int len)
     }
 
     char* buffer = (char*)malloc(sizeof(char)*BUFFER_SIZE);
-
     sprintf(buffer, "$%d\r\n%s\r\n", strlen(value), value);
 
     return buffer;
