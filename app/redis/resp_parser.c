@@ -93,28 +93,27 @@ struct array_element* parse_array(char* data)
 int get_command(struct array_element* command, int len)
 {
     struct bulk_string first = *(struct bulk_string*)command[0].data;
-    int command;
+    int comm;
 
     for (int i = 0; i < first.len; i++) {
         first.data[i] = tolower(first.data[i]);
     }
 
     if (strcmp(first.data, "echo") == 0) {
-        struct bulk_string arg = *(struct bulk_string*)command[1].data;
-        command = ECHO;
+        comm = ECHO;
     }
 
     else if (strcmp(first.data, "ping") == 0) {
-        command = PING;
+        comm = PING;
     }
 
     else if (strcmp(first.data, "set") == 0) {
-        command = SET;
+        comm = SET;
     }
 
     else if (strcmp(first.data, "get") == 0) {
-        command = GET;
+        comm = GET;
     }
 
-    return command;
+    return comm;
 }

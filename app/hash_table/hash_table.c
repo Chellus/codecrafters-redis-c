@@ -158,7 +158,7 @@ char* ht_get(hash_table* table, const char* key)
     return NULL;
 }
 
-char** ht_delete(hash_table* table, const char* key)
+char* ht_delete(hash_table* table, const char* key)
 {
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash = hash_key(key);
@@ -185,7 +185,7 @@ char** ht_delete(hash_table* table, const char* key)
     return NULL;
 }
 
-const char* ht_set(hash_table* table, const char* key, void* value)
+const char* ht_set(hash_table* table, const char* key, char* value)
 {
     assert(value != NULL);
     if (value == NULL) {

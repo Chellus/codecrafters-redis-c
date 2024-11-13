@@ -1,3 +1,5 @@
+
+#include "commands.h"
 #include "resp_parser.h"
 
 #include <stdio.h>

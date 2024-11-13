@@ -14,7 +14,7 @@ void ht_destroy(hash_table* table);
 
 // get item with given key from hash table. Return value or NULL if key
 // was not found
-void* ht_get(hash_table* table, const char* key);
+char* ht_get(hash_table* table, const char* key);
 
 // set key-value pair in hash table. 
 const char* ht_set(hash_table* table, const char* key, char* value);
