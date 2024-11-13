@@ -197,14 +197,12 @@ int handle_client_connection(int client_fd, hash_table* memory)
 			}
 
 			send(client_fd, response, strlen(response), 0);
-
         } else {
             printf("Read error on client %d: %s\n", client_fd, strerror(errno));
 			return_value = -1;
         }
     }
 
-	free(response);
 
 	return return_value;
 }
