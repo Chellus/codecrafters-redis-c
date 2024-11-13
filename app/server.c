@@ -10,14 +10,16 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "resp_parser.h"
+#include "redis/commands.h"
+#include "redis/resp_parser.h"
+#include "utils/hash_table/hash_table.h"
 
 #define PORT 6379
 #define BACKLOG 5
-#define BUFFER_SIZE 1024
 
 int init_server_socket();
-int handle_client_connection(int);
+int handle_client_connection(int, hash_table*);
+
 
 int main()
 {
@@ -34,7 +36,9 @@ int main()
 	int max_fd;
 
 	fd_set readfds;
-	
+
+	hash_table* memory = ht_create();
+
 	// init all client_socket[] to 0
 	for (i = 0; i < max_clients; i++)
 		client_fds[i] = 0;
@@ -84,7 +88,7 @@ int main()
 			printf("Client trying to connect\n");
 			int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
 			
-			handle_client_connection(client_fd);
+			handle_client_connection(client_fd, memory);
 
 			for (i = 0; i < max_clients; i++) {
 				if (client_fds[i] == 0) {
@@ -100,7 +104,7 @@ int main()
 				printf("Client %d sent ping message\n", client_fds[i]);
 				// returns 1 if the connection was closed, 0 for success,
 				// -1 for error
-				int ret = handle_client_connection(client_fds[i]);
+				int ret = handle_client_connection(client_fds[i], memory);
 				if (ret == 1) {
 					client_fds[i] = 0;
 				}
@@ -154,12 +158,14 @@ int init_server_socket()
 	return server_fd;
 }
 
-int handle_client_connection(int client_fd)
+int handle_client_connection(int client_fd, hash_table* memory)
 {
-    const char* msg = "+PONG\r\n";
     char buffer[BUFFER_SIZE];
     int valread;
 	int return_value;
+	int command;
+
+	char* response;
 
     if (client_fd >= 0) {
         valread = read(client_fd, buffer, BUFFER_SIZE);
@@ -173,7 +179,22 @@ int handle_client_connection(int client_fd)
             // parse message
 			int array_len = get_array_len(buffer);
 			struct array_element* received = parse_array(buffer);
-			char* response = build_response(received, array_len);
+			command = get_command(received, array_len);
+
+			switch (command) {
+			case ECHO:
+				response = redis_echo(received, array_len);
+				break;
+			case PING:
+				response = redis_ping();
+				break;
+			case SET:
+				response = redis_set(memory, received, array_len);
+				break;
+			case GET:
+				response = redis_get(memory, received, array_len);
+				break;
+			}
 
 			send(client_fd, response, strlen(response), 0);
 
@@ -182,6 +203,8 @@ int handle_client_connection(int client_fd)
 			return_value = -1;
         }
     }
+
+	free(response);
 
 	return return_value;
 }

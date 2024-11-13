@@ -90,11 +90,10 @@ struct array_element* parse_array(char* data)
     return elements;
 }
 
-char* build_response(struct array_element* command, int len)
+int get_command(struct array_element* command, int len)
 {
-
     struct bulk_string first = *(struct bulk_string*)command[0].data;
-    char* buffer = (char*)malloc(sizeof(char)*1024);
+    int command;
 
     for (int i = 0; i < first.len; i++) {
         first.data[i] = tolower(first.data[i]);
@@ -102,12 +101,20 @@ char* build_response(struct array_element* command, int len)
 
     if (strcmp(first.data, "echo") == 0) {
         struct bulk_string arg = *(struct bulk_string*)command[1].data;
-        sprintf(buffer, "$%d\r\n%s\r\n", arg.len, arg.data);
+        command = ECHO;
     }
 
     else if (strcmp(first.data, "ping") == 0) {
-        sprintf(buffer, "+PONG\r\n");
+        command = PING;
     }
 
-    return buffer;
+    else if (strcmp(first.data, "set") == 0) {
+        command = SET;
+    }
+
+    else if (strcmp(first.data, "get") == 0) {
+        command = GET;
+    }
+
+    return command;
 }
