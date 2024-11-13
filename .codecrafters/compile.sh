@@ -8,4 +8,4 @@
 
 set -e # Exit on failure
 
-gcc -o /tmp/codecrafters-build-redis-c app/*.c redis/*.c hash_table/*.c
+gcc -o /tmp/codecrafters-build-redis-c app/*.c app/redis/*.c app/hash_table/*.c
