@@ -5,9 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-#include "../time/getmillis.h"
-
 #define INITIAL_CAPACITY 16
 
 typedef struct {
