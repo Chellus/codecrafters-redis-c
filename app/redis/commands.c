@@ -32,10 +32,27 @@ char* redis_set(hash_table* memory, struct array_element* elements, int len)
         return NULL;
     }
 
-    struct bulk_string arg1 = *(struct bulk_string*)elements[1].data;
-    struct bulk_string arg2 = *(struct bulk_string*)elements[2].data;
+    long expiry = NULL;
 
-    ht_set(memory, (char*)arg1.data, arg2.data);
+    if (len > 5) {
+        struct bulk_string* px = (struct bulk_string*)elements[4].data;
+        expiry = strtol(px->data, NULL, 10);
+    }
+
+    struct bulk_string* key = (struct bulk_string*)elements[1].data;
+    struct bulk_string* value = (struct bulk_string*)elements[2].data;
+
+    char* key_copy = (char*)malloc(key->len + 1);
+    char* value_copy = (char*)malloc(value->len + 1);
+
+    memcpy(key_copy, key->data, key->len);
+    key_copy[key->len] = '\0';
+
+    memcpy(value_copy, value->data, value->len);
+    value_copy[value->len] = '\0';
+
+
+    ht_set(memory, key_copy, value_copy, expiry);
 
     return "+OK\r\n";
 }
@@ -50,14 +67,18 @@ char* redis_get(hash_table* memory, struct array_element* elements, int len)
     struct bulk_string arg1 = *(struct bulk_string*)elements[1].data;
 
     char* value = ht_get(memory, arg1.data);
+    char* buffer;
 
-    if (value == NULL) {
-        return "$-1\r\n";
+    if (value != NULL) {
+        buffer = (char*)malloc(sizeof(char)*BUFFER_SIZE);
+        sprintf(buffer, "$%d\r\n%s\r\n", strlen(value), value);
+    }
+    else {
+        char* response = "$-1\r\n";
+        buffer = (char*)malloc(sizeof(char)*strlen(response));
+        strcpy(buffer, response);
     }
 
-    char* buffer = (char*)malloc(sizeof(char)*BUFFER_SIZE);
-    sprintf(buffer, "$%d\r\n%s\r\n", strlen(value), value);
 
     return buffer;
-
 }

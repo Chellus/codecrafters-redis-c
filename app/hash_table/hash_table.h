@@ -17,7 +17,7 @@ void ht_destroy(hash_table* table);
 char* ht_get(hash_table* table, const char* key);
 
 // set key-value pair in hash table. 
-const char* ht_set(hash_table* table, const char* key, char* value);
+const char* ht_set(hash_table* table, const char* key, char* value, long expiry);
 
 // delete value with given key
 char* ht_delete(hash_table* table, const char* key);

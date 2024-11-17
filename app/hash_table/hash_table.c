@@ -5,12 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../time/getmillis.h"
+
 #define INITIAL_CAPACITY 16
 
 typedef struct {
     const char* key;
     char* value;
     bool is_deleted;
+    long created_at;
+    long expiry;
 } ht_entry;
 
 struct hash_table {
@@ -69,11 +73,16 @@ static uint64_t hash_key(const char* key)
 }
 
 static const char* ht_set_entry(ht_entry* entries, size_t capacity, 
-                    const char* key, char* value, size_t* p_length)
+                const char* key, char* value, long created_at,
+                long expiry, size_t* p_length)
 {
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash = hash_key(key);
     size_t index = (size_t)(hash & (uint64_t)(capacity - 1));
+
+    if (created_at == NULL) {
+        created_at = currentMillis();
+    }
 
     // search for an empty or deleted entry
     while (entries[index].key != NULL || entries[index].is_deleted) {
@@ -81,6 +90,8 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
             // found key(it already exists), update value
             entries[index].value = value;
             entries[index].is_deleted = false;
+            entries[index].created_at = created_at;
+            entries[index].expiry = expiry;
             return entries[index].key;
         }
 
@@ -101,6 +112,8 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
 
     entries[index].key = (char*)key;
     entries[index].value = value;
+    entries[index].created_at = created_at;
+    entries[index].expiry = expiry;
     return key;
 }
 
@@ -121,7 +134,7 @@ static bool ht_expand(hash_table* table)
         ht_entry entry = table->entries[i];
         if (entry.key != NULL) {
             ht_set_entry(new_entries, new_capacity, entry.key,
-                        entry.value, NULL);
+                        entry.value, entry.created_at, entry.expiry, NULL);
         }
     }
 
@@ -137,12 +150,23 @@ char* ht_get(hash_table* table, const char* key)
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash = hash_key(key);
     size_t index = (size_t)(hash & (uint64_t)(table->capacity - 1));
+    bool expires;
+    bool expired;
 
     // loop till we find an empty entry
     while (table->entries[index].key != NULL) {
+        expires = table->entries[index].expiry != -1;
         if ((strcmp(key, table->entries[index].key) == 0) 
             && !table->entries[index].is_deleted) {
             // found key, return value
+            expired = (currentMillis() - table->entries[index].created_at) >
+                                         table->entries[index].expiry;
+            if (expires && expired) {
+                // the key has expired and is now going to be deleted.
+                ht_delete(table, key);
+                return NULL;
+            }
+
             return table->entries[index].value;
         }
 
@@ -185,7 +209,7 @@ char* ht_delete(hash_table* table, const char* key)
     return NULL;
 }
 
-const char* ht_set(hash_table* table, const char* key, char* value)
+const char* ht_set(hash_table* table, const char* key, char* value, long expiry)
 {
     assert(value != NULL);
     if (value == NULL) {
@@ -200,7 +224,7 @@ const char* ht_set(hash_table* table, const char* key, char* value)
     }
 
     return ht_set_entry(table->entries, table->capacity, key, value,
-                        &table->length);
+                        NULL, expiry, &table->length);
 }
 
 size_t ht_length(hash_table* table)

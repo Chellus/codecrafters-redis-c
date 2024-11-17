@@ -101,7 +101,6 @@ int main()
 		// else its some IO operation in some client socket
 		for (i = 0; i < 30; i++) {
 			if (FD_ISSET(client_fds[i], &readfds)) {
-				printf("Client %d sent ping message\n", client_fds[i]);
 				// returns 1 if the connection was closed, 0 for success,
 				// -1 for error
 				int ret = handle_client_connection(client_fds[i], memory);
@@ -162,10 +161,11 @@ int handle_client_connection(int client_fd, hash_table* memory)
 {
     char buffer[BUFFER_SIZE];
     int valread;
-	int return_value;
+	int return_value = 0;
 	int command;
 
-	char* response;
+	char* response = NULL;
+	bool free_response = false;
 
     if (client_fd >= 0) {
         valread = read(client_fd, buffer, BUFFER_SIZE);
@@ -184,19 +184,47 @@ int handle_client_connection(int client_fd, hash_table* memory)
 			switch (command) {
 			case ECHO:
 				response = redis_echo(received, array_len);
+				free_response = true;
 				break;
 			case PING:
 				response = redis_ping();
+				free_response = false;
 				break;
 			case SET:
 				response = redis_set(memory, received, array_len);
+				free_response = false;
 				break;
 			case GET:
 				response = redis_get(memory, received, array_len);
+				printf("Response from GET: %s\n", response);
+				free_response = true;
+				break;
+			default:
+				free_response = false;
 				break;
 			}
 
 			send(client_fd, response, strlen(response), 0);
+
+			// Free the allocated memory for received array
+            for (int i = 0; i < array_len; i++) {
+                // Assuming each element in received array needs to be freed
+                if (received[i].type == BULK_STRING) {
+                    struct bulk_string* str = (struct bulk_string*)received[i].data;
+
+        			// Print the bulk string's length and data before freeing
+        			printf("Freeing bulk string at index %d: length=%d, data=%s\n", i, str->len, str->data);
+	
+        			free(str->data);       // Free the bulk string data
+        			free(received[i].data); // Free the bulk string structure itself
+                }
+            }
+            free(received); // Free the array of elements
+			received = NULL;
+			if (free_response && response != NULL) {
+				free(response);
+			}
+
         } else {
             printf("Read error on client %d: %s\n", client_fd, strerror(errno));
 			return_value = -1;
