@@ -10,10 +10,11 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "time/getmillis.h"
+
 #include "redis/commands.h"
 #include "redis/resp_parser.h"
 #include "hash_table/hash_table.h"
-#include "time/getmillis.h"
 
 #define PORT 6379
 #define BACKLOG 5
