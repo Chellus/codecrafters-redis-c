@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../time/getmillis.h"
 
@@ -82,6 +83,7 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
 
     if (created_at == NULL) {
         created_at = currentMillis();
+        printf("Entry with key %s created at %d\n", key, created_at);
     }
 
     // search for an empty or deleted entry
