@@ -57,7 +57,8 @@ char* redis_set(hash_table* memory, struct array_element* elements, int len)
     return "+OK\r\n";
 }
 
-char* redis_get(hash_table* memory, struct array_element* elements, int len)
+char* redis_get(hash_table* memory, struct array_element* elements, int len,
+                long received_at)
 {
     // bad get usage
     if (len != 2) {
@@ -66,7 +67,7 @@ char* redis_get(hash_table* memory, struct array_element* elements, int len)
     
     struct bulk_string arg1 = *(struct bulk_string*)elements[1].data;
 
-    char* value = ht_get(memory, arg1.data);
+    char* value = ht_get(memory, arg1.data, received_at);
     char* buffer;
 
     if (value != NULL) {

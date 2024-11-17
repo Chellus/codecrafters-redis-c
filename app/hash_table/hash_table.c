@@ -147,7 +147,7 @@ static bool ht_expand(hash_table* table)
     return true;
 }
 
-char* ht_get(hash_table* table, const char* key)
+char* ht_get(hash_table* table, const char* key, long received_at)
 {
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash = hash_key(key);
@@ -161,7 +161,7 @@ char* ht_get(hash_table* table, const char* key)
         if ((strcmp(key, table->entries[index].key) == 0) 
             && !table->entries[index].is_deleted) {
             // found key, return value
-            expired = (currentMillis() - table->entries[index].created_at) >
+            expired = (received_at - table->entries[index].created_at) >
                                          table->entries[index].expiry;
             if (expires && expired) {
                 // the key has expired and is now going to be deleted.

@@ -13,12 +13,13 @@
 #include "redis/commands.h"
 #include "redis/resp_parser.h"
 #include "hash_table/hash_table.h"
+#include "time/getmillis.h"
 
 #define PORT 6379
 #define BACKLOG 5
 
 int init_server_socket();
-int handle_client_connection(int, hash_table*);
+int handle_client_connection(int, hash_table*, long);
 
 
 int main()
@@ -88,7 +89,7 @@ int main()
 			printf("Client trying to connect\n");
 			int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
 			
-			handle_client_connection(client_fd, memory);
+			handle_client_connection(client_fd, memory, currentMillis());
 
 			for (i = 0; i < max_clients; i++) {
 				if (client_fds[i] == 0) {
@@ -103,7 +104,7 @@ int main()
 			if (FD_ISSET(client_fds[i], &readfds)) {
 				// returns 1 if the connection was closed, 0 for success,
 				// -1 for error
-				int ret = handle_client_connection(client_fds[i], memory);
+				int ret = handle_client_connection(client_fds[i], memory, currentMillis());
 				if (ret == 1) {
 					client_fds[i] = 0;
 				}
@@ -157,7 +158,7 @@ int init_server_socket()
 	return server_fd;
 }
 
-int handle_client_connection(int client_fd, hash_table* memory)
+int handle_client_connection(int client_fd, hash_table* memory, long received_at)
 {
     char buffer[BUFFER_SIZE];
     int valread;
@@ -195,7 +196,7 @@ int handle_client_connection(int client_fd, hash_table* memory)
 				free_response = false;
 				break;
 			case GET:
-				response = redis_get(memory, received, array_len);
+				response = redis_get(memory, received, array_len, received_at);
 				printf("Response from GET: %s\n", response);
 				free_response = true;
 				break;
@@ -211,10 +212,6 @@ int handle_client_connection(int client_fd, hash_table* memory)
                 // Assuming each element in received array needs to be freed
                 if (received[i].type == BULK_STRING) {
                     struct bulk_string* str = (struct bulk_string*)received[i].data;
-
-        			// Print the bulk string's length and data before freeing
-        			printf("Freeing bulk string at index %d: length=%d, data=%s\n", i, str->len, str->data);
-	
         			free(str->data);       // Free the bulk string data
         			free(received[i].data); // Free the bulk string structure itself
                 }

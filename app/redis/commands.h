@@ -12,6 +12,7 @@
 char* redis_ping();
 char* redis_echo(struct array_element* elements, int len);
 char* redis_set(hash_table* memory, struct array_element* elements, int len);
-char* redis_get(hash_table* memory, struct array_element* elements, int len);
+char* redis_get(hash_table* memory, struct array_element* elements, int len,
+                long received_at);
 
 #endif
