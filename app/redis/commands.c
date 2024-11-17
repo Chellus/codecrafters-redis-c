@@ -34,13 +34,16 @@ char* redis_set(hash_table* memory, struct array_element* elements, int len)
 
     long expiry = NULL;
 
-    if (len > 5) {
-        struct bulk_string* px = (struct bulk_string*)elements[4].data;
-        expiry = strtol(px->data, NULL, 10);
-    }
 
     struct bulk_string* key = (struct bulk_string*)elements[1].data;
     struct bulk_string* value = (struct bulk_string*)elements[2].data;
+
+    
+    if (len > 5) {
+        struct bulk_string* px = (struct bulk_string*)elements[4].data;
+        expiry = strtol(px->data, NULL, 10);
+        printf("Expiry for entry with key %s is %d", key, expiry);
+    }
 
     char* key_copy = (char*)malloc(key->len + 1);
     char* value_copy = (char*)malloc(value->len + 1);
