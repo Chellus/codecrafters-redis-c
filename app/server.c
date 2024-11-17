@@ -197,6 +197,7 @@ int handle_client_connection(int client_fd, hash_table* memory, long received_at
 				free_response = false;
 				break;
 			case GET:
+				printf("GET request received at %d", received_at);
 				response = redis_get(memory, received, array_len, received_at);
 				printf("Response from GET: %s\n", response);
 				free_response = true;
