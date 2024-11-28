@@ -80,7 +80,7 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
 
     if (created_at == 0) {
         created_at = currentMillis();
-        printf("Entry with key %s created at %d\n", key, created_at);
+        printf("Entry with key %s created at %ld\n", key, created_at);
     }
 
     // search for an empty or deleted entry
