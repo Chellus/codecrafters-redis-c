@@ -165,7 +165,7 @@ char* ht_get(hash_table* table, const char* key, long received_at)
             if (expires && expired) {
                 // the key has expired and is now going to be deleted.
                 printf("The key is deleted because it expired. (received (%d) - created (%d) >= %d)\n",
-                        received_at, table->entries[index].created_at, 
+                        received_at, table->entries[index].created_at,
                         table->entries[index].expiry);
                 ht_delete(table, key);
                 return NULL;
