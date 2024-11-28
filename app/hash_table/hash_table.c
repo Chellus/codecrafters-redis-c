@@ -1,5 +1,7 @@
 #include "hash_table.h"
 
+#include "../time/getmillis.h"
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
