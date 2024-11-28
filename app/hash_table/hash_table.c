@@ -78,7 +78,7 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
     uint64_t hash = hash_key(key);
     size_t index = (size_t)(hash & (uint64_t)(capacity - 1));
 
-    if (created_at == NULL) {
+    if (created_at == 0) {
         created_at = currentMillis();
         printf("Entry with key %s created at %d\n", key, created_at);
     }
@@ -87,6 +87,7 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
     while (entries[index].key != NULL || entries[index].is_deleted) {
         if (strcmp(key, entries[index].key) == 0) {
             // found key(it already exists), update value
+            free(entries[index].value);
             entries[index].value = value;
             entries[index].is_deleted = false;
             entries[index].created_at = created_at;
@@ -96,7 +97,7 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
 
         // key wasn't in this slot, move to the next
         index++;
-        if (index >= 0) {
+        if (index >= capacity) {
             index = 0;
         }
     }

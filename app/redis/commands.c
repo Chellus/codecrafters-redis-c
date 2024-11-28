@@ -32,7 +32,7 @@ char* redis_set(hash_table* memory, struct array_element* elements, int len)
         return NULL;
     }
 
-    long expiry = NULL;
+    long expiry = -1;
 
 
     struct bulk_string* key = (struct bulk_string*)elements[1].data;
