@@ -159,7 +159,7 @@ char* ht_get(hash_table* table, const char* key, long received_at)
         if ((strcmp(key, table->entries[index].key) == 0) 
             && !table->entries[index].is_deleted) {
             // found key, return value
-            printf("%d - %d = %d\n", received_at, table->entries[index].created_at,
+            printf("%ld - %ld = %ld\n", received_at, table->entries[index].created_at,
             received_at - table->entries[index].created_at);
             expired = expires && ((received_at - table->entries[index].created_at) >= table->entries[index].expiry);
 
