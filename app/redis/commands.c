@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DECIMAL 10
+
 char* redis_ping()
 {
     return "+PONG\r\n";
@@ -28,20 +30,29 @@ char* redis_echo(struct array_element* elements, int len)
 char* redis_set(hash_table* memory, struct array_element* elements, int len)
 {
     // bad set usage
-    if (len < 3) {
+    if (len < 3 || len == 4) {
         return NULL;
     }
 
     long expiry = -1;
 
-
     struct bulk_string* key = (struct bulk_string*)elements[1].data;
     struct bulk_string* value = (struct bulk_string*)elements[2].data;
-
     
     if (len >= 5) {
-        struct bulk_string* px = (struct bulk_string*)elements[4].data;
-        expiry = strtol(px->data, NULL, 10);
+        struct bulk_string type = *(struct bulk_string*)elements[3].data;
+
+        for (int i = 0; i < type.len; i++) {
+            type.data[i] = tolower(type.data[i]);
+        }
+
+        if (strcmp(type.data, "ex") != 0 && strcmp(type.data, "px") != 0)
+            return NULL;
+
+        struct bulk_string* exp = (struct bulk_string*)elements[4].data;
+        expiry = strtol(exp->data, NULL, DECIMAL);
+        if (strcmp(type.data, "ex") == 0)
+            expiry *= 1000;
         printf("Expiry for entry with key %s is %d\n", key, expiry);
     }
 
@@ -53,7 +64,6 @@ char* redis_set(hash_table* memory, struct array_element* elements, int len)
 
     memcpy(value_copy, value->data, value->len);
     value_copy[value->len] = '\0';
-
 
     ht_set(memory, key_copy, value_copy, expiry);
 
