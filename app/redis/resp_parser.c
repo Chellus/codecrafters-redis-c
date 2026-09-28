@@ -11,7 +11,7 @@ int get_array_len(char* data)
     int len = 0;
     if (data[0] != '*') {
         printf("The data is not a a valid RESP array!\n");
-        return NULL;
+        return -1;
     }
 
     data++;

@@ -81,7 +81,7 @@ static const char* ht_set_entry(ht_entry* entries, size_t capacity,
     size_t index = (size_t)(hash & (uint64_t)(capacity - 1));
 
     if (created_at == 0) {
-        created_at = currentMillis();
+        created_at = current_millis();
         printf("Entry with key %s created at %ld\n", key, created_at);
     }
 
@@ -232,7 +232,7 @@ const char* ht_set(hash_table* table, const char* key, char* value, long expiry)
     }
 
     return ht_set_entry(table->entries, table->capacity, key, value,
-                        NULL, expiry, &table->length);
+                        0, expiry, &table->length);
 }
 
 size_t ht_length(hash_table* table)

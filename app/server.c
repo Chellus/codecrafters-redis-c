@@ -90,7 +90,7 @@ int main()
 			printf("Client trying to connect\n");
 			int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
 			
-			handle_client_connection(client_fd, memory, currentMillis());
+			handle_client_connection(client_fd, memory, current_millis());
 
 			for (i = 0; i < max_clients; i++) {
 				if (client_fds[i] == 0) {
@@ -105,7 +105,7 @@ int main()
 			if (FD_ISSET(client_fds[i], &readfds)) {
 				// returns 1 if the connection was closed, 0 for success,
 				// -1 for error
-				int ret = handle_client_connection(client_fds[i], memory, currentMillis());
+				int ret = handle_client_connection(client_fds[i], memory, current_millis());
 				if (ret == 1) {
 					client_fds[i] = 0;
 				}
