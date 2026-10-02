@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "commands.h"
+#include "types.h"
 
 #define BULK_STRING '$'
 #define NUMBER ':'
@@ -18,19 +18,9 @@
 
 #define BUFFER_SIZE 4096
 
-struct array_element {
-    int type;
-    void* data;
-};
-
-struct bulk_string {
-    int len;
-    char* data;
-};
-
 int get_array_len(char*);
 int get_len_element(char, char**);
 struct bulk_string parse_bulk_string(char**);
 struct array_element* parse_array(char*);
-int get_command(struct array_element*, int);
+command_t get_command(struct array_element*, int);
 #endif

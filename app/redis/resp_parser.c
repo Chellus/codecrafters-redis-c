@@ -90,10 +90,10 @@ struct array_element* parse_array(char* data)
     return elements;
 }
 
-int get_command(struct array_element* command, int len)
+command_t get_command(struct array_element* command, int len)
 {
     struct bulk_string first = *(struct bulk_string*)command[0].data;
-    int comm;
+    command_t comm;
 
     for (int i = 0; i < first.len; i++) {
         first.data[i] = tolower(first.data[i]);
